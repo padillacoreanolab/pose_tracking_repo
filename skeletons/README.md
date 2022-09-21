@@ -3,7 +3,7 @@
 ## 1. Birds Eye View
 
 - Associated file
-    - [skewed_diamond.json](./skeletons/skewed_diamond.json)
+    - [skewed_diamond.json](./skewed_diamond.json)
 
 - Body part locations:
     - nose: 
