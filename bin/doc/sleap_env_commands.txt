@@ -1,0 +1,3 @@
+conda deactivate
+conda create -y -p ./sleap_env -c sleap -c nvidia -c conda-forge sleap=1.2.8
+conda activate ./sleap_env
