@@ -1,5 +1,6 @@
 # %%
 import h5py
+import os
 import numpy as np
 import umap
 import hdbscan
@@ -19,6 +20,8 @@ from sklearn.decomposition import PCA
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 
 np.set_printoptions(threshold=np.inf)
@@ -136,24 +139,51 @@ def unpickle_embedding():
         data = pickle.load(f)
     return data
 
+def combine_videos(folder, output_video_name):
+    '''
+    combines all files within a given folder name 
+    creates a video file called vidname
+    folder (str) , vidname (str) 
+    '''
+    path = os.fsencode(os.path.join(".", folder))
+    clips = []
+    for file in os.listdir(path):
+        filename = os.path.join(folder, os.fsdecode(file))
+        clip = VideoFileClip(filename)
+        clips.append(clip.without_audio())
+    final = concatenate_videoclips(clips)
+    final.write_videofile(output_video_name)
 
+# combine_videos("videos", "final_merge.mp4")
+    
 
 
 # This is to speed up development. We first pickle (save)
 # save_to_pickle()
 embedding, loc_test = unpickle_embedding()
 
-def display_frame_from_video(frame, video_filename = ""):
+fig, (ax1, ax2) = plt.subplots(1, 2)
 
+VIDEO_FILENAME = "final_merge.mp4"
+clip = VideoFileClip(VIDEO_FILENAME)
 
+ax2.imshow(clip.get_frame(0))
+
+print(clip.duration)
+print(clip.reader.nframes)
+
+def display_frame_from_video(frame, axes=ax2):
+    # getting frame at time 3
+    frame = clip.get_frame(frame)
+    # showing the frame with the help of matplotlib
+    plt.imshow(frame, interpolation ='nearest')
 
 ### GRAPHING STUFF ####
-plt.scatter(
-    embedding[:, 0],
-    embedding[:, 1])
-    #c=[sns.color_palette()[x] for x in penguins.species.map({"Adelie":0, "Chinstrap":1, "Gentoo":2})])
-plt.gca().set_aspect('equal', 'datalim')
-plt.title('UMAP projection of tube test data', fontsize=24);
+# plt.scatter(
+#     embedding[:, 0],
+#     embedding[:, 1])
+#     #c=[sns.color_palette()[x] for x in penguins.species.map({"Adelie":0, "Chinstrap":1, "Gentoo":2})])
+# plt.gca().set_aspect('equal', 'datalim')
 
 # %%
 clusterable_embedding = umap.UMAP(
@@ -167,15 +197,14 @@ hdbscan_labels = hdbscan.HDBSCAN(min_samples=10, min_cluster_size=500).fit_predi
 
 print("Printing plot lib")
 clustered = (hdbscan_labels >= 0)
-fig, ax = plt.subplots()
-sc = plt.scatter(clusterable_embedding[clustered, 0],
+sc = ax1.scatter(clusterable_embedding[clustered, 0],
             clusterable_embedding[clustered, 1],
             c=hdbscan_labels[clustered],
             s=10,
             cmap='Spectral')
 
 
-annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+annot = ax1.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                     bbox=dict(boxstyle="round", fc="w"),
                     arrowprops=dict(arrowstyle="->"))
 annot.set_visible(False)
@@ -187,13 +216,14 @@ def update_annot(ind):
     annot.xy = pos
     text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
                            " ".join([str(n) for n in ind["ind"]]))
+    display_frame_from_video(ind["ind"][0])
     annot.set_text(text)
 
 
 def hover(event):
     print(event)
     vis = annot.get_visible()
-    if event.inaxes == ax:
+    if event.inaxes == ax1:
         cont, ind = sc.contains(event)
         if cont:
             update_annot(ind)
