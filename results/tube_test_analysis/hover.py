@@ -174,7 +174,7 @@ print(clip.reader.nframes)
 
 def display_frame_from_video(frame, axes=ax2):
     # getting frame at time 3
-    frame = clip.get_frame(frame)
+    frame = clip.get_frame(frame/30)
     # showing the frame with the help of matplotlib
     plt.imshow(frame, interpolation ='nearest')
 
