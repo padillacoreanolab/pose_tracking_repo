@@ -3,6 +3,9 @@
 *.AVI
 *.mp4
 *.avi
+*.svg
+*.csv
+*.xlsx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
